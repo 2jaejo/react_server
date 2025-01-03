@@ -25,7 +25,7 @@ let data = [
 
 // GET: 모든 데이터 조회
 app.get("/api/items", (req, res) => {
-  res.json(data);
+  res.status(201).json(data);
 });
 
 // POST: 새로운 데이터 추가
@@ -35,7 +35,7 @@ app.post("/api/items", (req, res) => {
     name: req.body.name,
   };
   data.push(newItem);
-  res.status(201).json(newItem);
+  res.status(202).json(newItem);
 });
 
 // PUT 요청: 데이터를 수정하는 API
@@ -50,7 +50,7 @@ app.put('/api/items', (req, res) => {
     // 데이터 수정
     item.name = name;
     // 수정된 데이터 응답
-    res.json({ message: `Item with id ${id} has been updated`, updatedItem: item });
+    res.status(203).json({ message: `Item with id ${id} has been updated`, updatedItem: item });
 });
 
 // DELETE: 특정 데이터 삭제
