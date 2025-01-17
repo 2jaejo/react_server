@@ -1,14 +1,26 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
 const PORT = require('./config/serverConfig').DEFAULT_PORT;
 const app = express();
+const authenticateToken = require('./utils/authToken'); // 미들웨어 import
 
 
 // Middleware 설정
-app.use(cors()); // CORS 허용
+app.use(cors({
+  credentials: true
+})); // CORS 허용
+app.use(cookieParser());
 app.use(bodyParser.json()); // JSON 요청 본문 파싱
 app.use(bodyParser.urlencoded({ extended: true })); // URL-encoded 요청 본문 파싱
+// 인증 제외
+app.use(authenticateToken.unless({
+  path: [
+    { url: '/auth/login', methods: ['POST'] }, 
+    { url: '/auth/join', methods: ['POST'] },
+  ]
+}));
 
 // 서버 실행
 const server = app.listen(PORT, () => {
@@ -50,7 +62,7 @@ const userRouter = require('./routes/user');
 const itemRouter = require('./routes/item');
 
 app.use('/', indexRouter);
-app.use('/login', loginRouter);
+app.use('/auth', loginRouter);
 app.use('/users', userRouter);
 app.use('/api/items', itemRouter);
 
