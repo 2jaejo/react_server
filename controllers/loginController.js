@@ -45,8 +45,8 @@ exports.login = async (req, res) => {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,       // JavaScript로 접근 불가
         // secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 사용
-        sameSite: 'strict',   // SameSite 설정
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7일간 유효
+        // sameSite: 'strict',   // SameSite 설정
+        // maxAge: 7 * 24 * 60 * 60 * 1000 // 7일간 유효
       });
       res.status(200).json(result);
     }
