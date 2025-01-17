@@ -45,10 +45,12 @@ wss.on('connection', (ws, req) => {
 
 // 라우트 연결
 const indexRouter = require('./routes/index');
+const loginRouter = require('./routes/login');
 const userRouter = require('./routes/user');
 const itemRouter = require('./routes/item');
 
 app.use('/', indexRouter);
+app.use('/login', loginRouter);
 app.use('/users', userRouter);
 app.use('/api/items', itemRouter);
 
