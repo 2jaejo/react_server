@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const PORT = require('./config/serverConfig').DEFAULT_PORT;
 const app = express();
 const authenticateToken = require('./utils/authToken'); 
-const webSocketServer = require('../utils/websocketServer');
+const webSocketServer = require('./utils/websocketServer');
 
 // Middleware 설정
 app.use(cors({
