@@ -5,10 +5,21 @@ const users = [
   { id: 3, name: 'Charlie', age: 35 },
 ];
 
-exports.getUsers = () => {
-  return users;
+const userService = {
+  getUsers: () => {
+    return users;
+  },
+  getUserById: (id) => {
+    return users.find((user) => user.id === parseInt(id, 10));
+  },
 };
 
-exports.getUserById = (id) => {
-  return users.find((user) => user.id === parseInt(id, 10));
-};
+export default userService;
+
+// export const getUsers = () => {
+//   return users;
+// };
+
+// export const getUserById = (id) => {
+//   return users.find((user) => user.id === parseInt(id, 10));
+// };

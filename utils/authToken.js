@@ -1,7 +1,10 @@
-require('dotenv').config();
+// require('dotenv').config();
+// const jwt = require('jsonwebtoken');
+// const { unless } = require('express-unless');
 
-const jwt = require('jsonwebtoken');
-const { unless } = require('express-unless');
+import 'dotenv/config';  // dotenv를 ES 모듈 방식으로 import
+import jwt from 'jsonwebtoken';
+import { unless } from 'express-unless';
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -47,4 +50,4 @@ const authenticateToken = (req, res, next) => {
 
 // 특정 경로를 제외
 authenticateToken.unless = unless;
-module.exports = authenticateToken;
+export default authenticateToken;

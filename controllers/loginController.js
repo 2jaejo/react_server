@@ -1,7 +1,12 @@
-require('dotenv').config();
-const pool = require('../config/db');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+// require('dotenv').config();
+// const pool = require('../config/db');
+// const jwt = require('jsonwebtoken');
+// const bcrypt = require('bcryptjs');
+
+import 'dotenv/config';  // dotenv를 ES 모듈 방식으로 import
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import pool from '../config/db.js';
 
 // 토큰생성
 const generateTokens = (user) => {
@@ -21,64 +26,124 @@ const comparePassword = async (plainPassword, hashedPassword) => {
   }
 };
 
-// 미들웨어에서 토큰 검증
-exports.validate = (req, res) => {
-  console.log("validate");
-  res.status(200).send();
-};
+const loginController = {
+  validate: (req, res) => {
+    console.log("validate");
+    res.status(200).send();
+  },
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      // 비밀번호 해시
+      // const hashedPassword = await bcrypt.hash(password, 10);
+      const params = [email];
+      const user = await pool.query('SELECT * FROM tb_user WHERE user_id = $1', params);
+      const chk_pw = await comparePassword(password ,user.rows[0].user_pw);
+      console.log(chk_pw);
+      if (chk_pw) {
+        const { accessToken, refreshToken } = generateTokens(user);
+        const result = {token: accessToken};
 
-
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // 비밀번호 해시
-    // const hashedPassword = await bcrypt.hash(password, 10);
-    const params = [email];
-    const user = await pool.query('SELECT * FROM tb_user WHERE user_id = $1', params);
-    const chk_pw = await comparePassword(password ,user.rows[0].user_pw);
-    console.log(chk_pw);
-    if (chk_pw) {
-      const { accessToken, refreshToken } = generateTokens(user);
-      const result = {token: accessToken};
-
-      // HTTP-Only 쿠키에 리프레시 토큰 저장
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,       // JavaScript로 접근 불가
-        // secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 사용
-        // sameSite: 'strict',   // SameSite 설정
-        // maxAge: 7 * 24 * 60 * 60 * 1000 // 7일간 유효
-      });
-      res.status(200).json(result);
+        // HTTP-Only 쿠키에 리프레시 토큰 저장
+        res.cookie('refreshToken', refreshToken, {
+          httpOnly: true,       // JavaScript로 접근 불가
+          // secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 사용
+          // sameSite: 'strict',   // SameSite 설정
+          // maxAge: 7 * 24 * 60 * 60 * 1000 // 7일간 유효
+        });
+        res.status(200).json(result);
+      }
+      else{
+        throw new Error("비밀번호를 확인하세요.");
+      }
+      
+    } catch (error) {
+      res.status(400).json(error.message);
     }
-    else{
-      throw new Error("비밀번호를 확인하세요.");
+  },
+  logout: async (req, res) => {
+    try {
+      res.clearCookie('refreshToken'); // 리프레시 토큰 쿠키 제거
+      return res.status(200).json({ message: '로그아웃 성공.' });
+    } catch (error) {
+      res.status(400).json(error.message);
     }
+  },
+  join: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      // 비밀번호 해시
+      // const hashedPassword = await bcrypt.hash(password, 10);
+      
+      res.status(200).json();
+      
+    } catch (error) {
+      res.status(400).json(error.message);
+    }
+  },
+}
+
+export default loginController;
+
+// // 미들웨어에서 토큰 검증
+// export const validate = (req, res) => {
+//   console.log("validate");
+//   res.status(200).send();
+// };
+
+
+// export const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     // 비밀번호 해시
+//     // const hashedPassword = await bcrypt.hash(password, 10);
+//     const params = [email];
+//     const user = await pool.query('SELECT * FROM tb_user WHERE user_id = $1', params);
+//     const chk_pw = await comparePassword(password ,user.rows[0].user_pw);
+//     console.log(chk_pw);
+//     if (chk_pw) {
+//       const { accessToken, refreshToken } = generateTokens(user);
+//       const result = {token: accessToken};
+
+//       // HTTP-Only 쿠키에 리프레시 토큰 저장
+//       res.cookie('refreshToken', refreshToken, {
+//         httpOnly: true,       // JavaScript로 접근 불가
+//         // secure: process.env.NODE_ENV === 'production', // HTTPS 환경에서만 사용
+//         // sameSite: 'strict',   // SameSite 설정
+//         // maxAge: 7 * 24 * 60 * 60 * 1000 // 7일간 유효
+//       });
+//       res.status(200).json(result);
+//     }
+//     else{
+//       throw new Error("비밀번호를 확인하세요.");
+//     }
     
-  } catch (error) {
-    res.status(400).json(error.message);
-  }
-};
+//   } catch (error) {
+//     res.status(400).json(error.message);
+//   }
+// };
 
-exports.logout = async (req, res) => {
-  try {
-    res.clearCookie('refreshToken'); // 리프레시 토큰 쿠키 제거
-    return res.status(200).json({ message: '로그아웃 성공.' });
-  } catch (error) {
-    res.status(400).json(error.message);
-  }
-};
+// export const logout = async (req, res) => {
+//   try {
+//     res.clearCookie('refreshToken'); // 리프레시 토큰 쿠키 제거
+//     return res.status(200).json({ message: '로그아웃 성공.' });
+//   } catch (error) {
+//     res.status(400).json(error.message);
+//   }
+// };
 
 
-exports.join = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// export const join = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
 
-    // 비밀번호 해시
-    // const hashedPassword = await bcrypt.hash(password, 10);
+//     // 비밀번호 해시
+//     // const hashedPassword = await bcrypt.hash(password, 10);
     
-    res.status(200).json();
+//     res.status(200).json();
     
-  } catch (error) {
-    res.status(400).json(error.message);
-  }
-};
+//   } catch (error) {
+//     res.status(400).json(error.message);
+//   }
+// };
