@@ -1,6 +1,11 @@
-const express = require('express');
+// const express = require('express');
+// const router = express.Router();
+// const loginController = require('../controllers/loginController');
+
+import express from 'express';
+import loginController from '../controllers/loginController.js';
+
 const router = express.Router();
-const loginController = require('../controllers/loginController');
 
 // validate
 router.get('/validate', loginController.validate);
@@ -11,4 +16,5 @@ router.post('/login', loginController.login);
 // 로그아웃
 router.post('/logout', loginController.logout);
 
-module.exports = router;
+// module.exports = router;
+export default router;
