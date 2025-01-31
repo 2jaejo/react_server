@@ -1,4 +1,5 @@
 import { WebSocketServer } from "ws";
+import OPCUAClientModule from './opcuaClientModule.js';  
 
 class WebSocketManager {
   constructor(server) {
@@ -6,32 +7,38 @@ class WebSocketManager {
     this.clients = [];
     // 클라이언트 구독 관리
     this.subscriptions = new Map();
-  
     // 센서 데이터 예시 (임의 데이터)
     this.sensorData = {
-      sensor1: () => Math.random().toFixed(1),
-      sensor2: () => Math.random().toFixed(2),
-      sensor3: () => Math.random().toFixed(3),
+      "sensor1": 0.1,
+      "sensor2": 0.2,
+      "sensor3": 0.3,
     };
 
     this.wss = new WebSocketServer({ server });
 
+    // OPC UA 클라이언트 싱글톤 인스턴스 생성
+    this.opcuaClient = OPCUAClientModule.getInstance();
+
     this.wss.on("connection", (ws) => {
       console.log("New client connected");
 
-      const interval = setInterval(() => {
-        this.subscriptions.forEach((sensors, client) => {
+      const interval = setInterval( () => {
+        // 센서 데이터 읽기
+        this.subscriptions.forEach( (sensors, client) => {
           if (client.readyState === WebSocket.OPEN) {
             const dataToSend = {};
-            sensors.forEach((sensor) => {
-              if (this.sensorData[sensor]) {
-                dataToSend[sensor] = this.sensorData[sensor]();
+            sensors.forEach( (sensor) => {
+              const value = this.sensorData[sensor];
+              if (value !== null && value !== undefined) {
+                dataToSend[sensor] = value;
               }
             });
+            // 클라이언트에 센서 데이터 전송
             client.send(JSON.stringify({ sensors: dataToSend }));
           }
         });
-      }, 2000); // 2초마다 전송
+
+      }, 3000); 
 
       ws.on("message", (message) => {
         console.log(`Received: ${message}`);
