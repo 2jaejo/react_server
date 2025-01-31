@@ -23,7 +23,7 @@ const authenticateToken = (req, res, next) => {
         // 리프레시 토큰 검증
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (refreshErr, decoded) => {
           if (refreshErr) {
-            return res.status(403).json({ message: '리프레시토큰이 유효하지 않거나 만료되었습니다.' });
+            return res.status(402).json({ message: '리프레시토큰이 유효하지 않거나 만료되었습니다.' });
           }
 
           // 새 엑세스 토큰 발급

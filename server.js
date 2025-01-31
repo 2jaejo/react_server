@@ -12,7 +12,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import { DEFAULT_PORT } from './config/serverConfig.js';  
-import authenticateToken from './utils/authToken.js';  
+import authenticateToken from './utils/authenticateToken.js';  
 
 import WebSocketManager from './utils/webSocketManager.js';  
 import OPCUAClientModule from './utils/opcuaClientModule.js';  
@@ -68,19 +68,21 @@ const opcuaClient = OPCUAClientModule.getInstance();
 const endpointUrl = "opc.tcp://localhost:8087/abhopcua/server/"; // 예시 서버 주소
 await opcuaClient.connect(endpointUrl);
 await opcuaClient.createSubscription();
-await opcuaClient.addSubscriptionListener('ns=2;i=5', (nodeId, value)=>{
-  wsm.sensorData[nodeId] = value;
-});
-await opcuaClient.addSubscriptionListener('ns=2;i=6', (nodeId, value)=>{
-  wsm.sensorData[nodeId] = value;
-});
+
+// 구독 이벤트 콜백 함수
+const callback = (id, val) => {
+  wsm.sensorData[id] = val;
+};
+
+await opcuaClient.addSubscriptionListener('ns=2;i=5', callback);
+await opcuaClient.addSubscriptionListener('ns=2;i=6', callback);
 
 // 종료 시 클라이언트 연결 해제
 process.on("SIGINT", async () => {
   console.log("Shutting down server...");
   await opcuaClient.close();
   process.exit(0);
-});
+});  
 
 
 
