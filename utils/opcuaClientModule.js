@@ -32,7 +32,6 @@ class OPCUAClientModule {
       }
     } catch (error) {
       console.error("OPC UA 서버 연결 실패:", error);
-      throw error;
     }
   }
 
@@ -49,7 +48,6 @@ class OPCUAClientModule {
       return dataValue.value.value;
     } catch (error) {
       console.error("노드 읽기 실패:", error);
-      throw error;
     }
   }
 
@@ -78,7 +76,6 @@ class OPCUAClientModule {
 
     } catch (error) {
       console.error("구독 생성 실패:", error);
-      throw error;
     }
 
   }
